@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>exact-cli login</title>
+<style>
+  :root { --bg: #fafafa; --fg: #1a1a1a; --muted: #666; --box: #fff; --border: #ddd; --accent: #e0002a; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161616; --fg: #eee; --muted: #999; --box: #222; --border: #3a3a3a; }
+  }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 640px; margin: 12vh auto; padding: 0 16px; }
+  h1 { font-size: 1.3rem; margin: 0 0 .5rem; }
+  p { color: var(--muted); margin: .5rem 0; }
+  .row { display: flex; gap: 8px; margin-top: 1rem; }
+  input { flex: 1; min-width: 0; padding: 8px 10px; font: 13px ui-monospace, monospace; background: var(--box); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; }
+  button { padding: 8px 14px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+  [hidden] { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">exact-cli login</h1>
+  <p id="msg">This page only receives the Exact Online login redirect for the <code>exact</code> command-line tool.</p>
+  <div id="manual" hidden>
+    <p>If the terminal didn't continue on its own, copy this URL and paste it into the terminal:</p>
+    <div class="row"><input id="url" readonly><button id="copy" type="button">Copy</button></div>
+  </div>
+</main>
+<script>
+  // Forwards the OAuth redirect to the `exact auth` listener on this computer.
+  // Nothing is stored or sent anywhere else.
+  var LOCAL = "http://127.0.0.1:8765/callback";
+  var q = location.search;
+  if (/[?&](code|error)=/.test(q)) {
+    document.getElementById("title").textContent = "Sending the login to exact-cli…";
+    document.getElementById("msg").textContent = "Your browser is being forwarded to the exact command running on this computer.";
+    document.getElementById("url").value = location.href;
+    document.getElementById("manual").hidden = false;
+    document.getElementById("copy").onclick = function () {
+      var input = document.getElementById("url");
+      input.select();
+      (navigator.clipboard ? navigator.clipboard.writeText(input.value) : Promise.reject())
+        .catch(function () { document.execCommand("copy"); });
+      this.textContent = "Copied";
+    };
+    setTimeout(function () { location.replace(LOCAL + q); }, 600);
+  }
+</script>
+</body>
+</html>
